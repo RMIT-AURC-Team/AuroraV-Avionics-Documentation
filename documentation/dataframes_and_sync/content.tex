@@ -1,0 +1,81 @@
+\section{Overview}
+This document provides a high level introduction to the generic structure of avionics data as it is being stored in flash memory, with an overview of how synchronisation is achieved to match up high and low resolution data together with that logged by the Blue Raven altimeters.
+
+Section~\ref{sec:dataframe-structure} details the dataframe structure and its constituent bytes, with Section~\ref{sec:synchronisation} describing the data synchronisation logic.
+
+
+\section{Dataframe structure}\label{sec:dataframe-structure}
+Figure~\ref{fig:dataframe-structure} provides a bytefield structure for the dataframes being constructed from the on-board avionics sensors. Each frame contains a two-byte header that identifies the type of data recorded in the payload (e.g. high resolution, low resolution or rocket payload data), describes the number of bytes contained within the payload, and provides a synchronisation byte for post processing.\\[0.5em]
+
+\begin{figure}[h]
+  \begin{center}\hspace{4.5em}
+  \begin{bytefield}[bitwidth=2em, endianness=big]{8}
+    \bitheader{0,5,6,7}\\
+    \begin{rightwordgroup}{Header}
+      \bitbox{2}[bgcolor=bittersweet]{ID} 
+      \bitbox{6}[bgcolor=aquamarine]{length}\\
+      \wordbox{1}[bgcolor=aquamarine]{Sync} 
+    \end{rightwordgroup}\\
+    \begin{rightwordgroup}{Payload}
+      \wordbox{1}{$D_0$[15:8]}\\
+      \wordbox{1}{$D_0$[7:0]}\\
+      \wordbox{1}{$D_1$[15:8]}\\
+      \wordbox[lrt]{1}{}\\
+      \cskippedwords{blue!20}\\
+      \wordbox[lrb]{1}{}\\
+      \wordbox{1}{$D_n$[7:0]}
+    \end{rightwordgroup}
+  \end{bytefield}
+  \end{center}
+  \caption{Dataframe structure for avionics}
+  \label{fig:dataframe-structure}
+\end{figure}
+
+These dataframes will be stored within a \verb|uint8_t| buffer as opposed to a 16-bit equivalent. This is because some sensor data is contained within 24 bits per sample, so to make efficient use of space while maintaining simplicity of implementation 8-bit nibbles are desirable.
+
+\subsection{Data typing}\label{sec:data-typing}
+Data stored by the avionics system will retain the raw structure as output by the on-board sensors, written as 8-bit unsigned blocks. This is to minimise the amount of storage used with each frame, as well as to avoid any processing overhead from computing real data. 
+
+Processing can then be done offline during analysis to obtain real data, for example by multiplying out the sensitivity of a given sensor into a floating point variable.
+
+\begin{figure}[h]
+  \begin{center}\hspace{4.5em}
+  \begin{bytefield}[endianness=big]{16}
+    \bitheader{0,15}\\
+    \begin{rightwordgroup}{X-axis}
+      \bitbox{8}[]{Upper nibble} 
+      \bitbox{8}[]{Lower nibble} 
+    \end{rightwordgroup}\\
+    \begin{rightwordgroup}{Y-axis}
+      \bitbox{8}[]{Upper nibble} 
+      \bitbox{8}[]{Lower nibble} 
+    \end{rightwordgroup}\\
+    \begin{rightwordgroup}{Z-axis}
+      \bitbox{8}[]{Upper nibble} 
+      \bitbox{8}[]{Lower nibble} 
+    \end{rightwordgroup}
+  \end{bytefield}
+  \end{center}
+  \caption{Example structure for a single sensor payload}
+  \label{fig:payload-structure}
+\end{figure}
+
+The payload of each dataframe will consist of consecutive groupings of sensor data, an example of which is pictured in Figure~\ref{fig:payload-structure}. No delimiter will be used to separate these groupings and instead processing will be performed by using an agreed upon structure. 
+
+Code that processes this data will need to read in each dataframe from memory, using the length field in the header to delimit where the data ends. Based on the type information from the frame header, each variable of data can then be read.
+
+\section{Synchronisation}\label{sec:synchronisation}
+According to the Blue Raven user's guide \cite{adamson_2023}, synchronisation between high and low resolution data is achieved through a "sync code" that is stored with the data. This code is essentially a counter that increments with each millisecond, with overflow at a count of 250. 
+
+To maintain synchronisation both with our own sets of data, as well as with the Blue Raven data (for the sake of comparison), an identical solution will be implemented within our own logging system. As outlined in Section~\ref{sec:dataframe-structure}, this sync code is included as a full byte in the frame header, following the id and frame length. This byte will be included with all forms of saved data to maintain synchronisation parity across the board.
+
+\subsection{Example synchronisation code}
+
+\begin{lstlisting}[language=c++, breaklines=true]
+
+  /*======================
+            TODO
+  =======================*/
+
+\end{lstlisting}
+
