@@ -47,19 +47,48 @@ Lower priority tasks are scheduled with more flexible timing but may enter criti
 \subsection{Health Monitor}
 <To be designed>
 
-\subsection{Flash}
+\subsection{Flash \normalfont\small{(impl. Appendix~\ref{apdx:flash})}}
 Flashing of data primarily occurs during idle time on the CPU. This is managed through a task group flag that enables the operation, unblocking the task that handles writing of flash.
 
-\subsubsection{Enable}
+\subsubsection{Flash Enable}
 The avionics firmware implements a FreeRTOS idle hook that runs when no tasks are occupying time on the CPU. 
+
+\begin{lstlisting}[caption={Flash idle logic}, captionpos=t]
+  // Write if a page is available in the buffer
+  if (currentState == LAUNCH && mem.pageReady)
+    xEventGroupSetBits(xTaskEnableGroup, 0x01);
+\end{lstlisting}
 
 If a launch event has occurred, the memory buffer is polled to determine if data is ready to be written. When this is the case an event group flag is set to enable the flash write task.
 
-\subsubsection{Write}
 
-\subsection{Communications}
+\subsubsection{Flash Write}
+\begin{lstlisting}[caption={Flash write logic}, captionpos=t]
+    // Wait for write flag to be ready, clear flag on exit
+    EventBits_t uxBits = xEventGroupWaitBits(xTaskEnableGroup, 0x01, pdTRUE, pdFALSE, timeout);
+    if ((uxBits & 0x01) == 0x01) {
+      // Flush data to output buffer
+      bool success = mem.readPage(&mem, outBuff); 
+      if (success) {
+        // Write data to flash memory
+        write_data_spi(outBuff, &hspi4, pageAddr, spi4_cs);
+        pageAddr += 0x100;
+      }
+    }
+\end{lstlisting}
+
+The write task blocks on the task group bit that is set by the idle hook. When the flag is set, the task will attempt to flush the memory buffer, writing the full page to flash and incrementing the write address if successful. 
+
+\subsection{Communications \normalfont\small{(impl. Appendix~\ref{apdx:comms})}}
+Communications on-board Aurora V are handled both internally and externally. Telemetry to the ground, as well as ground station commands to the rocket, are handled wirelessly over LoRa. Internal communications to other subsystems implement a CAN bus interface. 
+
+Within the RTOS firmware, these communications handle in- and out-bound messages through queues.
+
 \subsubsection{LoRa}
+foo
+
 \subsubsection{CAN}
+bar
 
 \subsection{Data Acquisition}
 \subsubsection{High Resolution}

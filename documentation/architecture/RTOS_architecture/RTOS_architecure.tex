@@ -1,8 +1,10 @@
 \documentclass[a4paper, oneside]{memoir}
 
 \usepackage[T1]{fontenc}
+\usepackage{cascadia-code}
 \usepackage{palatino}
 \usepackage{pgfplots}
+\usepackage{geometry}
 \usepackage{fancyhdr}
 \usepackage{bookmark}
 \usepackage{hyperref}
@@ -75,14 +77,6 @@
 \setlength{\parskip}{0.5em}
 \setlength{\parindent}{0pt}
 
-\lstset{language=C++,
-                basicstyle=\ttfamily,
-                keywordstyle=\color{blue}\ttfamily,
-                stringstyle=\color{red}\ttfamily,
-                commentstyle=\color{lightgreen}\ttfamily,
-                morecomment=[l][\color{magenta}]{\#}
-}
-
 \newcommand*{\titleAM}[1]%
 {\begingroup
   \centering
@@ -138,13 +132,15 @@
 \definecolor{whitesmoke}{rgb}{0.96, 0.96, 0.96}
 \definecolor{lightgreen}{RGB}{102,153,0}    %#669900
 
-\lstset{language=C++,
-                basicstyle=\ttfamily,
-                keywordstyle=\color{blue}\ttfamily,
-                stringstyle=\color{red}\ttfamily,
-                commentstyle=\color{lightgreen}\ttfamily,
-                morecomment=[l][\color{magenta}]{\#},
-                backgroundcolor=\color{whitesmoke}
+\lstset{
+  language=C,
+  basicstyle=\fontfamily{cascadia}\selectfont,
+  keywordstyle=\color{blue}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  commentstyle=\color{lightgreen}\ttfamily,
+  morecomment=[l][\color{magenta}]{\#},
+  backgroundcolor=\color{whitesmoke},
+  breaklines=true,
 }
 
 \renewcommand{\printtoctitle}[1]{\huge#1\\[0.25em]}
@@ -173,10 +169,14 @@
   \vspace{2.5em}
   \tableofcontents*
   \vfill
-  \noindent\vspace{-0.95in}\makebox[\textwidth]{\includegraphics[width=\headwidth]{./img/footer.png}}
+  \begin{minipage}[t]{\dimexpr\textwidth-0.7in}
+    \hspace*{-0.7in} % Indent the text
+    \includegraphics[width=\headwidth]{./img/footer.png}\hspace{0.7in}
+  \end{minipage}
   \thispagestyle{empty}
   \clearpage
 
   \input{content}
+  \input{appendix}
 
 \end{document}

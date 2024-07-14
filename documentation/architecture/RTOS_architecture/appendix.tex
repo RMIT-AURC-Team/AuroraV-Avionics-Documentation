@@ -1,9 +1,34 @@
+\newgeometry{top=1in,bottom=in,left=1in,right=1in}
 \renewcommand{\thechapter}{\Alph{chapter}}
 \renewcommand{\thefigure}{\Alph{chapter}.\arabic{figure}}
 \renewcommand{\chaptername}{Appendix}
 
+\addcontentsline{toc}{part}{Appendix}
+\clearpage
+\chapter{}\label{apdx:flash}
+\begin{lstlisting}[caption={Flash task implementation}, captionpos=b]
+// Use idle time to write flash
+void vApplicationIdleHook(void) {
+  // Write if a page is available in the buffer
+  if (currentState == LAUNCH && mem.pageReady)
+    xEventGroupSetBits(xTaskEnableGroup, 0x01);
+}
 
-
-%\addcontentsline{toc}{part}{Appendix}
-%\clearpage
-%\chapter{}\label{apdx:a}
+void vFlashBuffer(void *argument) {
+  const TickType_t timeout = pdMS_TO_TICKS(1);
+  uint32_t pageAddr        = 0;
+  for (;;) {
+    // Wait for write flag to be ready, clear flag on exit
+    EventBits_t uxBits = xEventGroupWaitBits(xTaskEnableGroup, 0x01, pdTRUE, pdFALSE, timeout);
+    if ((uxBits & 0x01) == 0x01) {
+      // Flush data to output buffer
+      bool success = mem.readPage(&mem, outBuff); 
+      if (success) {
+        // Write data to flash memory
+        write_data_spi(outBuff, &hspi4, pageAddr, spi4_cs);
+        pageAddr += 0x100;
+      }
+    }
+  }
+}
+\end{lstlisting}
