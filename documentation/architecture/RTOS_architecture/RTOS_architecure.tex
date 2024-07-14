@@ -1,0 +1,146 @@
+\documentclass[a4paper, oneside]{memoir}
+
+\usepackage[T1]{fontenc}
+\usepackage{palatino}
+\usepackage{pgfplots}
+\usepackage{bookmark}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{bytefield}
+\usepackage{tikz}
+\usepackage{titlesec}
+\usetikzlibrary{positioning,fit,calc,chains,matrix,arrows.meta}
+\usepackage[yyyymmdd]{datetime}
+\chapterstyle{bringhurst}
+
+\makepagestyle{aurora}
+\makeoddfoot{aurora}{\vspace{-3.5em}\noindent\makebox[\textwidth]{\includegraphics[width=\textwidth]{./img/footer.png}}}{\thepage}{}
+\pagestyle{aurora}
+
+\setlength\cftchapterindent{\cftsectionindent}
+\setlength\cftbeforechapterskip{0pt}
+
+\renewcommand{\cftchapterleader}{\cftdotfill{\cftdotsep}}
+\titleformat*{\section}{\huge\bfseries}
+\titleformat*{\subsection}{\LARGE\bfseries}
+\titleformat*{\subsubsection}{\Large\bfseries}
+
+\setlrmarginsandblock{1.25in}{1.25in}{*} 
+\setulmarginsandblock{1.25in}{1.25in}{*} 
+\checkandfixthelayout%
+
+\renewcommand{\baselinestretch}{1.125}
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thefigure}{\arabic{figure}}
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+
+\lstset{language=C++,
+                basicstyle=\ttfamily,
+                keywordstyle=\color{blue}\ttfamily,
+                stringstyle=\color{red}\ttfamily,
+                commentstyle=\color{lightgreen}\ttfamily,
+                morecomment=[l][\color{magenta}]{\#}
+}
+
+\newcommand*{\titleAM}[1]%
+{\begingroup
+  \centering
+  {\Huge Aurora V Avionics Documentation\par}\\[\baselineskip]
+  {\huge #1}\par\vspace{0.5em}
+  {\small RMIT University}\par
+  \endgroup}
+
+\newcommand*{\versionInfo}[2]%
+{\begingroup
+  \centering
+  \begin{table}[h]
+  \centering
+  \begin{tabularx}{0.5\textwidth}{@{}X@{}}
+    Version            \dotfill #1\\
+    Last Updated       \dotfill \today\\
+    Major Contributors \dotfill #2
+  \end{tabularx}
+  \end{table}
+\endgroup}
+
+\renewcommand{\tocheadstart}{}
+\renewcommand{\aftertoctitle}{}
+\renewcommand{\printtoctitle}[1]{}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\makeatletter
+\DeclareRobustCommand{\cskippedwords}[2][2ex]{%
+  \setlength{\units@wide}{\bf@bitwidth * \bits@wide}%
+  \setlength{\units@high}{1pt * \ratio{\units@wide}{6.0pt}}%
+  \setlength{\units@tall}{#1 + \units@high}%
+  \edef\num@wide{\strip@pt\units@wide}%
+  \edef\num@tall{\strip@pt\units@tall}%
+  \edef\num@high{\strip@pt\units@high}%
+  \begin{picture}(\num@wide,\num@tall)%
+  \begin{tikzpicture}[overlay]
+  \draw[fill=#2,fill opacity=0.2] 
+    (0,-\bf@bitheight) -- (0,0) -- (0,\units@high) -- (\units@wide,0) -- +(0,-\bf@bitheight) -- cycle;
+  \draw[fill=#2,fill opacity=0.2]
+    (0,\units@high+#1+\bf@bitheight) -- ++(\units@wide,0) -- ++(0,-\bf@bitheight-\units@high) -- (0,\units@high+#1) -- cycle;
+  \end{tikzpicture}%
+  \end{picture}%
+  \ifcounting@words
+    \inc@bytefield@height{\unitlength * \real{\num@tall}}%
+    \global\counting@wordsfalse
+  \fi}
+\makeatother
+
+\definecolor{bittersweet}{rgb}{1.0, 0.44, 0.37}
+\definecolor{aquamarine}{rgb}{0.5, 1.0, 0.83}
+\definecolor{lavender}{rgb}{0.9, 0.9, 0.98}
+\definecolor{whitesmoke}{rgb}{0.96, 0.96, 0.96}
+\definecolor{lightgreen}{RGB}{102,153,0}    %#669900
+
+\lstset{language=C++,
+                basicstyle=\ttfamily,
+                keywordstyle=\color{blue}\ttfamily,
+                stringstyle=\color{red}\ttfamily,
+                commentstyle=\color{lightgreen}\ttfamily,
+                morecomment=[l][\color{magenta}]{\#},
+                backgroundcolor=\color{whitesmoke}
+}
+
+\renewcommand{\printtoctitle}[1]{\huge#1\\[0.25em]}
+\renewcommand{\cftsectionfont}{\textbf}
+\renewcommand{\cftsectionfont}{\textbf}
+\renewcommand{\bibname}{References}
+
+\renewcommand{\dateseparator}{--}
+
+\begin{document}
+  \titleAM{FreeRTOS Task Architecture}
+  \versionInfo{1.0}{Matthew Ricci}
+
+  \begin{table}[h]
+  \centering
+  \begin{tabularx}{\textwidth}{lll}
+  Date & Changes Made & Made By \\
+  \midrule
+  \formatdate{14}{7}{2024} & Create initial document & Matthew Ricci\\
+  \midrule
+  \end{tabularx}
+  \end{table}
+  \markboth{}{}
+
+  \clearpage
+  \noindent\makebox[\textwidth]{\includegraphics[width=\textwidth]{./img/banner.png}}
+  \vspace{2.5em}
+  \tableofcontents*
+  \addtocontents{toc}{\protect\thispagestyle{aurora}}
+  \clearpage
+
+  \input{content}
+  \input{appendix}
+
+\end{document}

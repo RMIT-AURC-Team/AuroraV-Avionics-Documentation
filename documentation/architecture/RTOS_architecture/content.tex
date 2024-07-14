@@ -1,0 +1,67 @@
+\section{Architecture Overview}
+
+The Aurora V avionics firmware package implements FreeRTOS for task scheduling. The firmware is designed to provide logical implementation of hardware interfaces for communications and telemetry, state calculations, data logging, and more, while adhering to stringent timing requirements.
+
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}[
+      node distance=0mm and 3mm,
+      task/.style={rectangle, minimum height=6mm, rounded corners, draw=black!75, radius=5pt, anchor=west},
+      tier/.style={rectangle, draw=black, minimum width=10cm, minimum height=1cm, anchor=west},
+    ]
+    \node (health) [task, xshift=2mm] {Health Monitor};
+    \node (tierCRITICAL) [tier, label=left:{\color{red}CRITICAL}] {};
+
+    \node (flash) [task, below=of health.south west, anchor=north west, yshift=-0.4cm] {Flash Write};
+    \node (CANTx) [task, right=of flash] {CAN Tx};
+    \node (tier-1) [tier, below=of tierCRITICAL, label=left:-1] {};
+
+    \node (HDataAcq) [task, below=of flash.south west, anchor=north west, yshift=-0.4cm] {High Res Data Acquisition};
+    \node (tier-2) [tier, below=of tier-1, label=left:-2] {};
+
+    \node (LDataAcq) [task, below=of HDataAcq.south west, anchor=north west, yshift=-0.4cm] {Low Res Data Acquisition};
+    \node (tier-3) [tier, below=of tier-2, label=left:-3] {};
+
+    \node (state) [task, below=of LDataAcq.south west, anchor=north west, yshift=-0.4cm] {State Management};
+    \node (tier-4) [tier, below=of tier-3, label=left:-4] {};
+
+    \node (LoRa) [task, below=of state.south west, anchor=north west, yshift=-0.4cm] {LoRa Tx};
+    \node (CANRx) [task, right=of LoRa] {CAN Rx};
+    \node (tier-5) [tier, below=of tier-4, label=left:-5] {};
+
+    \node (flashEN) [task, below=of LoRa.south west, anchor=north west, yshift=-0.4cm] {Flash enable};
+    \node (idle) [tier, below=of tier-5, label=left:{\color{blue}Idle}] {};
+
+    \draw[arrows = {Latex-Latex}] ([xshift=4mm]tierCRITICAL.north east)--node[label, right]{Priority}([xshift=4mm]idle.south east);
+  \end{tikzpicture}
+  \caption{Avionics RTOS task hierarchy}\label{fig:priority}
+\end{figure}
+
+Figure~\ref{fig:priority}  illustrates a high-level overview of the task architecture. Tasks with higher priority are designed to execute promptly whenever they are not blocked, ensuring critical operations are performed without delay. 
+
+Lower priority tasks are scheduled with more flexible timing but may enter critical sections to prevent preemption during essential operations.
+
+\section{Task Description}
+
+\subsection{Health Monitor}
+<To be designed>
+
+\subsection{Flash}
+Flashing of data primarily occurs during idle time on the CPU. This is managed through a task group flag that enables the operation, unblocking the task that handles writing of flash.
+
+\subsubsection{Enable}
+The avionics firmware implements a FreeRTOS idle hook that runs when no tasks are occupying time on the CPU. 
+
+If a launch event has occurred, the memory buffer is polled to determine if data is ready to be written. When this is the case an event group flag is set to enable the flash write task.
+
+\subsubsection{Write}
+
+\subsection{Communications}
+\subsubsection{LoRa}
+\subsubsection{CAN}
+
+\subsection{Data Acquisition}
+\subsubsection{High Resolution}
+\subsubsection{Low Resolution}
+
+\subsection{State Management}
