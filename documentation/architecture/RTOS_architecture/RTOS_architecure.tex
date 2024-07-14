@@ -3,6 +3,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{palatino}
 \usepackage{pgfplots}
+\usepackage{fancyhdr}
 \usepackage{bookmark}
 \usepackage{hyperref}
 \usepackage{enumitem}
@@ -15,11 +16,40 @@
 \usepackage{titlesec}
 \usetikzlibrary{positioning,fit,calc,chains,matrix,arrows.meta}
 \usepackage[yyyymmdd]{datetime}
-\chapterstyle{bringhurst}
+\pagestyle{empty}
 
-\makepagestyle{aurora}
-\makeoddfoot{aurora}{\vspace{-3.5em}\noindent\makebox[\textwidth]{\includegraphics[width=\textwidth]{./img/footer.png}}}{\thepage}{}
-\pagestyle{aurora}
+% This sucks
+% --------------------------------------------------------------------------------------
+\makeatletter
+\def\headrule{
+  \vskip-0.4\baselineskip % Adjust the vertical position of the rule if needed
+  \hspace*{-0.7in}\rule{\dimexpr\headwidth}{0.4pt} % 0.4pt is the thickness of the rule
+}
+\makeatother
+\fancyhead[L]{
+  \hspace*{-0.7in} % Indent the text
+  \begin{minipage}[t]{\dimexpr\textwidth-0.7in}
+    \raggedright \textbf{Aurora V} \par
+    \vspace{0.2em} % Adjust vertical spacing between text and rule
+  \end{minipage}
+}
+\fancyhead[R]{\textbf{\rightmark}\hspace{0.7in}}
+\fancyfoot[L]{
+  \vskip\vspace{0.2in}
+  \hspace*{-0.7in} % Indent the text
+  \begin{minipage}[t]{\dimexpr\textwidth-0.7in}
+    \includegraphics[width=\headwidth]{./img/footer.png}\hspace{0.7in}
+  \end{minipage}
+}
+\fancyfoot[C]{
+  \vskip\vspace{-0.25em}
+  \hspace*{-1.4in}
+  \begin{minipage}[t]{\dimexpr\textwidth-0.7in}
+    \centering
+    \thepage
+  \end{minipage}
+}
+% --------------------------------------------------------------------------------------
 
 \setlength\cftchapterindent{\cftsectionindent}
 \setlength\cftbeforechapterskip{0pt}
@@ -29,7 +59,13 @@
 \titleformat*{\subsection}{\LARGE\bfseries}
 \titleformat*{\subsubsection}{\Large\bfseries}
 
-\setlrmarginsandblock{1.25in}{1.25in}{*} 
+
+\setsecnumformat{\csname the#1\endcsname\hspace{0.7in-\widthof{\csname the#1\endcsname}}}
+\setsecindent{-0.7in}
+\setsubsecindent{-0.7in}
+\setsubsubsecindent{-0.7in}
+
+\setlrmarginsandblock{1.5in}{1in}{*} 
 \setulmarginsandblock{1.25in}{1.25in}{*} 
 \checkandfixthelayout%
 
@@ -131,16 +167,16 @@
   \midrule
   \end{tabularx}
   \end{table}
-  \markboth{}{}
 
   \clearpage
-  \noindent\makebox[\textwidth]{\includegraphics[width=\textwidth]{./img/banner.png}}
+  \noindent\makebox[\textwidth]{\includegraphics[width=\headwidth]{./img/banner.png}}
   \vspace{2.5em}
   \tableofcontents*
-  \addtocontents{toc}{\protect\thispagestyle{aurora}}
+  \vfill
+  \noindent\vspace{-0.95in}\makebox[\textwidth]{\includegraphics[width=\headwidth]{./img/footer.png}}
+  \thispagestyle{empty}
   \clearpage
 
   \input{content}
-  \input{appendix}
 
 \end{document}
